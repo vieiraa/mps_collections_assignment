@@ -180,7 +180,7 @@ public class DesafioMeuTimeApplication implements MeuTimeInterface {
 		
 		melhores.addAll(jogadores.stream()
 		        .sorted(Comparator.comparing(Jogador::getNivelHabilidade).reversed())
-		        .collect(Collectors.toList()));
+		        .collect(Collectors.toList()).subList(0, top));
 		
 		melhores.stream().forEach(j -> ids.add(j.getId()));
 		
