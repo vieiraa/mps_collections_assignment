@@ -174,10 +174,18 @@ public class DesafioMeuTimeApplication implements MeuTimeInterface {
 	    List<Jogador> melhores = new ArrayList<>();
 	    List<Long> ids = new ArrayList<>();
 	    
+	    if (times.isEmpty())
+	        return ids;
+	    
 	    Stream<Time> time = times.values().stream();
+	    
 	    time.forEach(t -> jogadores.addAll(t.getJogadores().values()));
+	    
+	    if (jogadores.isEmpty())
+	        return ids;
 		
 		melhores.addAll(jogadores.stream()
+		        .sorted(Comparator.comparing(Jogador::getId))
 		        .sorted(Comparator.comparing(Jogador::getNivelHabilidade).reversed())
 		        .collect(Collectors.toList()).subList(0, top));
 		
@@ -188,8 +196,12 @@ public class DesafioMeuTimeApplication implements MeuTimeInterface {
 
 	@Desafio("buscarCorCamisaTimeDeFora")
 	public String buscarCorCamisaTimeDeFora(Long timeDaCasa, Long timeDeFora) {
+	    if (!times.containsKey(timeDaCasa) || !times.containsKey(timeDeFora))
+	        throw new TimeNaoEncontradoException();
+	    
 	    Time casa = times.get(timeDaCasa);
 	    Time fora = times.get(timeDeFora);
+	    
 		if (casa.getCorUniformePrincipal() != fora.getCorUniformePrincipal()) {
 		    return fora.getCorUniformePrincipal();
 		}
