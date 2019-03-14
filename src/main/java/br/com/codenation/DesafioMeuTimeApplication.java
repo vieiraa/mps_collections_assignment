@@ -41,7 +41,7 @@ public class DesafioMeuTimeApplication implements MeuTimeInterface {
 	    if (!times.containsKey(idTime))
 	        throw new TimeNaoEncontradoException();
 	    
-	    if (times.values().stream().allMatch(t -> t.getJogadores().containsKey(idTime)))
+	    if (times.values().stream().anyMatch(t -> t.getJogadores().containsKey(id)))
 	        throw new IdentificadorUtilizadoException();
 	    
 		Jogador j = new Jogador(id, nome, dataNascimento, nivelHabilidade, salario);
@@ -75,8 +75,7 @@ public class DesafioMeuTimeApplication implements MeuTimeInterface {
 	    if (!times.containsKey(idTime))
 	        throw new TimeNaoEncontradoException();
 	    
-	    Stream<Time> time = times.values().stream();
-	    if (time.allMatch(t -> t.getJogadores().values().stream().allMatch(j -> !j.getCapitao())))
+	    if (times.get(idTime).getJogadores().values().stream().allMatch(j -> !j.getCapitao()))
 	        throw new CapitaoNaoInformadoException();
 	    
 	    return times.get(idTime).getJogadores().values().stream()
