@@ -41,7 +41,7 @@ public class DesafioMeuTimeApplication implements MeuTimeInterface {
 	    if (!times.containsKey(idTime))
 	        throw new TimeNaoEncontradoException();
 	    
-	    if (times.values().stream().anyMatch(t -> t.getJogadores().containsKey(idTime)))
+	    if (times.values().stream().allMatch(t -> t.getJogadores().containsKey(idTime)))
 	        throw new IdentificadorUtilizadoException();
 	    
 		Jogador j = new Jogador(id, nome, dataNascimento, nivelHabilidade, salario);
@@ -50,7 +50,7 @@ public class DesafioMeuTimeApplication implements MeuTimeInterface {
 
 	@Desafio("definirCapitao")
 	public void definirCapitao(Long idJogador) {
-	    if (times.values().stream().anyMatch(t -> !t.getJogadores().containsKey(idJogador)))
+	    if (times.values().stream().allMatch(t -> !t.getJogadores().containsKey(idJogador)))
 	        throw new JogadorNaoEncontradoException();
 	    
 	    Time time = times.values().stream()
@@ -76,7 +76,7 @@ public class DesafioMeuTimeApplication implements MeuTimeInterface {
 	        throw new TimeNaoEncontradoException();
 	    
 	    Stream<Time> time = times.values().stream();
-	    if (time.anyMatch(t -> t.getJogadores().values().stream().allMatch(j -> !j.getCapitao())))
+	    if (time.allMatch(t -> t.getJogadores().values().stream().allMatch(j -> !j.getCapitao())))
 	        throw new CapitaoNaoInformadoException();
 	    
 	    return times.get(idTime).getJogadores().values().stream()
@@ -87,18 +87,13 @@ public class DesafioMeuTimeApplication implements MeuTimeInterface {
 
 	@Desafio("buscarNomeJogador")
 	public String buscarNomeJogador(Long idJogador) {
-	    if (times.values().stream().anyMatch(t -> !t.getJogadores().containsKey(idJogador)))
+	    if (times.values().stream().allMatch(t -> !t.getJogadores().containsKey(idJogador)))
 	        throw new JogadorNaoEncontradoException();
 	    
-	    Jogador jogador = null;
-	    for (Time t : times.values()) {
-	        if (t.getJogadores().values().stream().anyMatch(j -> j.getId() == idJogador)) {
-    	        jogador = t.getJogadores().values().stream()
-    	                .filter(j -> j.getId() == idJogador)
-    	                .collect(Collectors.toList())
-    	                .get(0);
-	        }
-	    }
+	    Stream<Time> time = times.values().stream();
+	    Jogador jogador = time.filter(t -> t.getJogadores().containsKey(idJogador))
+	            .collect(Collectors.toList())
+	            .get(0).getJogadores().get(idJogador);
 	    
 	    return jogador.getNome();
 	}
@@ -163,38 +158,30 @@ public class DesafioMeuTimeApplication implements MeuTimeInterface {
 
 	@Desafio("buscarSalarioDoJogador")
 	public BigDecimal buscarSalarioDoJogador(Long idJogador) {
-	    if (times.values().stream().anyMatch(t -> !t.getJogadores().containsKey(idJogador)))
+	    if (times.values().stream().allMatch(t -> !t.getJogadores().containsKey(idJogador)))
             throw new JogadorNaoEncontradoException();
 	    
-	    Jogador jogador = null;
-        for (Time t : times.values()) {
-            if (t.getJogadores().values().stream().anyMatch(j -> j.getId() == idJogador)) {
-                jogador = t.getJogadores().values().stream()
-                        .filter(j -> j.getId() == idJogador)
-                        .collect(Collectors.toList())
-                        .get(0);
-            }
-        }
+	    Stream<Time> time = times.values().stream();
+	    Jogador jogador = time.filter(t -> t.getJogadores().containsKey(idJogador))
+                .collect(Collectors.toList())
+                .get(0).getJogadores().get(idJogador);
         
         return jogador.getSalario();
 	}
 
 	@Desafio("buscarTopJogadores")
 	public List<Long> buscarTopJogadores(Integer top) {
-	    List<Jogador> jogadores = new ArrayList<>();
+	    final List<Jogador> jogadores = new ArrayList<>();
 	    List<Jogador> melhores = new ArrayList<>();
 	    List<Long> ids = new ArrayList<>();
-		for (Time t : times.values()) {
-		    List<Jogador> aux = t.getJogadores().values().stream()
-		            .collect(Collectors.toList());
-		    jogadores.addAll(aux);
-		}
+	    
+	    Stream<Time> time = times.values().stream();
+	    time.forEach(t -> jogadores.addAll(t.getJogadores().values()));
 		
-		jogadores = jogadores.stream()
+		melhores.addAll(jogadores.stream()
 		        .sorted(Comparator.comparing(Jogador::getNivelHabilidade).reversed())
-		        .collect(Collectors.toList());
+		        .collect(Collectors.toList()));
 		
-		melhores.addAll(jogadores.subList(0, top));
 		melhores.stream().forEach(j -> ids.add(j.getId()));
 		
 		return ids;

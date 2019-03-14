@@ -22,7 +22,7 @@ public class Application {
         
         
 		
-		System.out.println(app.buscarTimes());
+		System.out.println(app.buscarTopJogadores(5));
 	}
 
 }
